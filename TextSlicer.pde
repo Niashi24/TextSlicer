@@ -25,6 +25,7 @@ void settings() {
 ImageSlicer currentSlicer = null;
 ArrayList<PImage> characters;
 ArrayList<ImageCharacterPair> pairs = new ArrayList<ImageCharacterPair>();
+boolean hasUnsavedCharacters = false;
 String outputText = null;
 
 String printArrayAs2D(char[] input, int arrWidth, int arrHeight) {
@@ -55,10 +56,18 @@ void draw() {
     sliceText.paint();
     saveImages.paint();
     if (pairs != null) {
+      fill(0);
+      stroke(0);
       text("Characters Loaded: " + pairs.size(), 0, 120);
+    }
+    if (hasUnsavedCharacters) {
+      fill(255,0,0);
+      stroke(255,0,0);
+      text("Unsaved characters", 150, 120);
     }
   } else if (state == State.SlicingText) {
     if (outputText == null) return;
+    if (currentSlicer == null) return;
     if (drawingThisFrame) {
       image(characters.get(index), 5, 5, 100, 100);
       drawingThisFrame = false;
@@ -102,6 +111,7 @@ void saveImages2(File f) {
     icp.image.save(f.getAbsolutePath() + "\\" + icp.character + ".png");
   }
   state = State.Waiting;
+  hasUnsavedCharacters = false;
 }
 
 void sliceText() {
@@ -176,6 +186,7 @@ String getFileName(String fileName) {
 void saveText() {
   state = State.Waiting;
   currentSlicer.saveText(outputText);
+  currentSlicer = null;
   //selectOutput("Select output for text", "saveText2");
 }
 
@@ -271,9 +282,12 @@ String createNewPair(PImage img) {
   String input = null;
   while (input == null || input.length() != 1) {
     input = JOptionPane.showInputDialog(null, "Enter character for image");
-    if (input != null && input.equals("-1"))
+    if (input != null && input.equals("-1")) {
       exit();
+      return input;
+    }
   }
+  hasUnsavedCharacters = true;
   return input;
 }
 
