@@ -4,7 +4,7 @@ public abstract class ImageSlicer
 
   public abstract ArrayList<PImage> process(PImage source);
 
-  String outputText;
+  protected String outputText;
   public void saveText(String outputText) {
     this.outputText = outputText;
     selectOutput("Select output for text", "saveTextFile", null, this);
@@ -23,11 +23,29 @@ public class RawDialogueSlicer extends ImageSlicer
     return sliceRaw(source.get(24, 168, 288, 48), 16);
   }
 
-  //public void saveText(String outputText) {
-  //  selectOutput("Select output for text", "saveTextFile", null, this);
-  //}
-
   public void saveTextFile(File f) {
-    println("here");
+    if (f == null) {
+      state = State.Waiting;
+      outputText = null;
+      return;
+    }
+    
+    //add 
+    this.outputText = insert(this.outputText, "\n", new int[] {18, 36});
+
+    OutputStream outputStream = createOutput(f.getAbsolutePath());
+    OutputStreamWriter osw = new OutputStreamWriter(outputStream, java.nio.charset.StandardCharsets.UTF_8);
+    try {
+      osw.write(this.outputText);
+      osw.close();
+      state = State.Waiting;
+      outputText = null;
+      return;
+    }
+    catch (Exception e) {
+      state = State.Waiting;
+      outputText = null;
+      return;
+    }
   }
 }

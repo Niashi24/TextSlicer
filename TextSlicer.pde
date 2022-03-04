@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.io.*;
 
+
 PImage img;
 
 enum State {
@@ -18,7 +19,7 @@ Button saveImages = new Button(215, 5, 100, 100, "Save Images");
 
 void settings() {
   noSmooth();
-  size(320, 110);
+  size(320, 120);
 }
 
 ImageSlicer currentSlicer = null;
@@ -53,6 +54,9 @@ void draw() {
     loadImages.paint();
     sliceText.paint();
     saveImages.paint();
+    if (pairs != null) {
+      text("Characters Loaded: " + pairs.size(), 0, 120);
+    }
   } else if (state == State.SlicingText) {
     if (outputText == null) return;
     if (drawingThisFrame) {
