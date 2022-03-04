@@ -5,9 +5,9 @@ PImage img;
 
 enum State {
   Waiting,
-  LoadingImages,
-  SlicingText,
-  SavingImages
+    LoadingImages,
+    SlicingText,
+    SavingImages
 }
 
 State state = State.Waiting;
@@ -15,11 +15,13 @@ State state = State.Waiting;
 Button loadImages = new Button(5, 5, 100, 100, "Load Images");
 Button sliceText = new Button(110, 5, 100, 100, "Slice Text");
 Button saveImages = new Button(215, 5, 100, 100, "Save Images");
+
 void settings() {
   noSmooth();
-  size(320,110);
+  size(320, 110);
 }
 
+ImageSlicer currentSlicer = null;
 ArrayList<PImage> characters;
 ArrayList<ImageCharacterPair> pairs = new ArrayList<ImageCharacterPair>();
 String outputText = null;
@@ -42,12 +44,12 @@ boolean drawingThisFrame = true;
 void draw() {
   clear();
   background(255);
-  
+
   if (state == State.Waiting) {
     loadImages.update();
     sliceText.update();
     saveImages.update();
-    
+
     loadImages.paint();
     sliceText.paint();
     saveImages.paint();
@@ -60,7 +62,7 @@ void draw() {
       outputText += getCharacter(pairs, characters.get(index));
       //arr[index] = getCharacter(pairs, characters.get(index));
       index++;
-      if (index % 18 == 0) outputText += '\n';
+      //if (index % 18 == 0) outputText += '\n';
       if (index >= characters.size()) {
         index = 0;
         saveText();
@@ -91,7 +93,7 @@ void saveImages2(File f) {
     state = State.Waiting;
     return;
   }
-  
+
   for (ImageCharacterPair icp : pairs) {
     icp.image.save(f.getAbsolutePath() + "\\" + icp.character + ".png");
   }
@@ -108,15 +110,32 @@ void sliceText2(File f) {
     state = State.Waiting;
     return;
   }
-  if (!isPNG(f)) 
+  if (!isPNG(f))
   {
     state = State.Waiting;
     return;
   }
   img = loadImage(f.getAbsolutePath());
-  img = img.get(24,168,288,48);
-  characters = sliceRaw(img, 16);
-  outputText = "";
+
+  ImageSlicer[] imageSlicers = new ImageSlicer[] {
+    new RawDialogueSlicer()
+  };
+
+  for (ImageSlicer imgSl : imageSlicers) {
+    if (imgSl.applies(img)) {
+      characters = imgSl.process(img);
+      outputText = "";
+      currentSlicer = imgSl;
+      return;
+    }
+  }
+
+  state = State.Waiting;
+  return;
+
+  //img = img.get(24,168,288,48);
+  //characters = sliceRaw(img, 16);
+  //outputText = "";
   //for (int i = 0; i < arr.length; i++) {
   //  arr[i] = getCharacter(pairs, characters.get(i));
   //}
@@ -133,7 +152,7 @@ void onLoadImages(File f) {
     state = State.Waiting;
     return;
   }
-  
+
   String[] pathNames = f.list();
   for (String s : pathNames) {
     if (isPNG(s)) {
@@ -152,7 +171,8 @@ String getFileName(String fileName) {
 
 void saveText() {
   state = State.Waiting;
-  selectOutput("Select output for text", "saveText2");
+  currentSlicer.saveText(outputText);
+  //selectOutput("Select output for text", "saveText2");
 }
 
 void saveText2(File f) {
@@ -161,19 +181,20 @@ void saveText2(File f) {
     outputText = null;
     return;
   }
-  
+
   //String outputText = printArrayAs2D(arr, 18, 3);
-  
+
   OutputStream outputStream = createOutput(f.getAbsolutePath());
   OutputStreamWriter osw = new OutputStreamWriter(outputStream, java.nio.charset.StandardCharsets.UTF_8);
-  
+
   try {
     osw.write(outputText);
     osw.close();
     state = State.Waiting;
     outputText = null;
     return;
-  } catch (Exception e) {
+  }
+  catch (Exception e) {
     state = State.Waiting;
     outputText = null;
     return;
@@ -200,13 +221,13 @@ boolean isPNG(String path) {
 
 ArrayList<PImage> sliceRaw(PImage source, int tileWidth) {
   ArrayList<PImage> output = new ArrayList<PImage>();
- 
+
   for (int j = 0; j < source.height; j += tileWidth) {
     for (int i = 0; i < source.width; i += tileWidth) {
-      output.add(source.get(i,j,tileWidth,tileWidth));
+      output.add(source.get(i, j, tileWidth, tileWidth));
     }
   }
- 
+
   return output;
 }
 
@@ -217,7 +238,7 @@ boolean contains(ArrayList<ImageCharacterPair> list, PImage item) {
     if (imagesEqual(img, item))
       return true;
   }
- 
+
   return false;
 }
 
@@ -234,10 +255,10 @@ String getCharacter(ArrayList<ImageCharacterPair> list, PImage item) {
     if (imagesEqual(img, item))
       return icp.character;
   }
- 
+
   String newChar = createNewPair(item);
   addItem(list, item, newChar);
- 
+
   return newChar;
 }
 
@@ -256,12 +277,12 @@ boolean imagesEqual(PImage a, PImage b) {
   if (a.width != b.width || a.height != b.height) return false;
   a.loadPixels();
   b.loadPixels();
- 
-  for(int i = 0; i < a.pixels.length; i++) {
+
+  for (int i = 0; i < a.pixels.length; i++) {
     if (a.pixels[i] != b.pixels[i]) {
       return false;
     }
   }
- 
+
   return true;
 }
