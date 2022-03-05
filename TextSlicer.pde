@@ -70,6 +70,9 @@ void draw() {
     if (currentSlicer == null) return;
     if (drawingThisFrame) {
       image(characters.get(index), 5, 5, 100, 100);
+      stroke(0);
+      noFill();
+      rect(5,5,100,100);
       drawingThisFrame = false;
     } else {
       outputText += getCharacter(pairs, characters.get(index));
