@@ -132,17 +132,27 @@ void sliceText2(File f) {
   img = loadImage(f.getAbsolutePath());
 
   ImageSlicer[] imageSlicers = new ImageSlicer[] {
-    new RawDialogueSlicer()
+    new RawDialogueSlicer(),
+    new RawImageSlicer()
   };
-
-  for (ImageSlicer imgSl : imageSlicers) {
-    if (imgSl.applies(img)) {
-      characters = imgSl.process(img);
+  
+  for (int i = 0; i < imageSlicers.length; i++) {
+    if (imageSlicers[i].applies(img)) {
+      characters = imageSlicers[i].process(img);
       outputText = "";
-      currentSlicer = imgSl;
+      currentSlicer = imageSlicers[i];
       return;
     }
   }
+
+  //for (ImageSlicer imgSl : imageSlicers) {
+  //  if (imgSl.applies(img)) {
+  //    characters = imgSl.process(img);
+  //    outputText = "";
+  //    currentSlicer = imgSl;
+  //    return;
+  //  }
+  //}
 
   state = State.Waiting;
   return;

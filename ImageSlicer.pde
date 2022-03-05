@@ -15,6 +15,7 @@ public abstract class ImageSlicer
 
 public class RawDialogueSlicer extends ImageSlicer
 {
+  public final String type = "RawDialogueSlicer";
   public boolean applies(PImage source) {
     return source.width == 352 && source.height == 352;
   }
@@ -29,9 +30,46 @@ public class RawDialogueSlicer extends ImageSlicer
       outputText = null;
       return;
     }
-    
-    //add 
+
+    //add
     this.outputText = insert(this.outputText, "\n", new int[] {18, 36});
+
+    OutputStream outputStream = createOutput(f.getAbsolutePath());
+    OutputStreamWriter osw = new OutputStreamWriter(outputStream, java.nio.charset.StandardCharsets.UTF_8);
+    try {
+      osw.write(this.outputText);
+      osw.close();
+      state = State.Waiting;
+      outputText = null;
+      return;
+    }
+    catch (Exception e) {
+      state = State.Waiting;
+      outputText = null;
+      return;
+    }
+  }
+}
+
+public class RawImageSlicer extends ImageSlicer {
+  public final String type = "RawImageSlicer";
+  int imgWidth;
+  int imgHeight;
+  public boolean applies(PImage source) {
+    return source.width % 16 == 0 && source.height % 16 == 0;
+  }
+  public ArrayList<PImage> process(PImage source) {
+    imgWidth = source.width;
+    imgHeight = source.height;
+    return sliceRaw(source, 16);
+  }
+  
+  public void saveTextFile(File f) {
+    if (f == null) {
+      state = State.Waiting;
+      outputText = null;
+      return;
+    }
 
     OutputStream outputStream = createOutput(f.getAbsolutePath());
     OutputStreamWriter osw = new OutputStreamWriter(outputStream, java.nio.charset.StandardCharsets.UTF_8);
