@@ -93,7 +93,7 @@ public class RawImageSlicer extends ImageSlicer {
     int tX = imgWidth / 16;
     int tY = imgHeight / 16;
     int[] indexes = new int[tY - 1];
-    for (int i = 0; i < indexes.length - 1; i++) {
+    for (int i = 0; i < indexes.length; i++) {
       indexes[i] = tX * (i + 1);
     }
     return insert(outputText, "\n", indexes);
