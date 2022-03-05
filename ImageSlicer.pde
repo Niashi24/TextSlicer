@@ -71,7 +71,7 @@ public class RawImageSlicer extends ImageSlicer {
       return;
     }
     
-    //outputText = insertLineEnds(outputText);
+    this.outputText = insertLineEnds(this.outputText);
 
     OutputStream outputStream = createOutput(f.getAbsolutePath());
     OutputStreamWriter osw = new OutputStreamWriter(outputStream, java.nio.charset.StandardCharsets.UTF_8);
@@ -91,11 +91,11 @@ public class RawImageSlicer extends ImageSlicer {
   
   String insertLineEnds(String outputText) {
     int tX = imgWidth / 16;
-    int tY = imgWidth / 16;
+    int tY = imgHeight / 16;
     int[] indexes = new int[tY - 1];
     for (int i = 0; i < indexes.length - 1; i++) {
       indexes[i] = tX * (i + 1);
     }
-    return insert(outputText, "\n", indexes); //<>//
+    return insert(outputText, "\n", indexes);
   }
 }
