@@ -1,5 +1,5 @@
 public String insert(String source, String keyword, int[] indexes) {
-  String output = ""; //<>//
+  String output = "";
   if (indexes.length == 0) return source;
   if (indexes.length == 1) {
     return source.substring(0, indexes[0]) + keyword + source.substring(indexes[0]);
