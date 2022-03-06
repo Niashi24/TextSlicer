@@ -15,3 +15,17 @@ public String insert(String source, String keyword, int[] indexes) {
 
   return output;
 }
+
+public PImage replace(PImage source, color oldColor, color newColor) {
+  PImage output = source.copy();
+  output.loadPixels();
+  source.loadPixels();
+  
+  for (int i = 0; i < output.pixels.length; i++) {
+    if (source.pixels[i] == oldColor)
+      output.pixels[i] = newColor;
+  }
+  output.updatePixels();
+  
+  return output;
+}
